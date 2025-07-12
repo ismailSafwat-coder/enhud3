@@ -259,7 +259,7 @@ class _CustomFormState extends State<CustomForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Don\'t Have account?',
+                'Don\'t Have an account?',
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,

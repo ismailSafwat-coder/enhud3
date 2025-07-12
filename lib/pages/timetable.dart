@@ -458,9 +458,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             setState(() {
-              mybox!.delete('noti');
-              mybox!.delete('timeSlots');
-              print('noti and timeSlots deleted ');
+              Navigator.pop(context);
             });
           },
         ),
@@ -865,6 +863,52 @@ class _StudyTimetableState extends State<StudyTimetable> {
                           ),
                           onPressed: () {
                             setState(() {
+                              // Handle freetime saving
+                              if (selectedCategory == 'freetime') {
+                                // For freetime, we need to get data from the Freetime widget
+                                // Since we can't directly access the widget state, we'll use a different approach
+                                // We'll create a simple "Free Time" entry
+                                Map<String, dynamic> notificationInfotoStore = {
+                                  'id': id,
+                                  "weeknumber": DateTime.now().weekday,
+                                  "daynumber": DateTime.now().day,
+                                  "week": currentWeekOffset,
+                                  "row": rowIndex,
+                                  'column': colIndex,
+                                  "title": "Free Time",
+                                  "description":
+                                      "Available for study or relaxation",
+                                  "unit": '',
+                                  "category": "freetime",
+                                  "done": false,
+                                  "time":
+                                      _extractFirstTime(timeSlots[rowIndex]),
+                                  "priority": null,
+                                };
+                                storeEoHive(notificationInfotoStore);
+
+                                // Update the current week's content
+                                allWeeksContent[currentWeekOffset][rowIndex]
+                                    [colIndex] = Container(
+                                  padding: const EdgeInsets.all(0),
+                                  height: height * 0.13,
+                                  width: double.infinity,
+                                  color: const Color(
+                                      0xff90EE90), // Light green for free time
+                                  child: const Center(
+                                    child: Text(
+                                      "Free Time",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                                Navigator.of(context).pop();
+                                return;
+                              }
+
                               if (taskController.text.isNotEmpty) {
                                 pickTimeAndScheduleNotification(
                                   timeSlots[rowIndex],

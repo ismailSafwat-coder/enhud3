@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: screens[index],
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 13),
         height: 60,
         decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFbfbfbf)),

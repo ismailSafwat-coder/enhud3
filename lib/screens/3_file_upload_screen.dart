@@ -85,6 +85,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                           textStyle: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
                               fontFamily: 'Cairo'),
                         ),
                         onPressed: () => Navigator.pop(context),

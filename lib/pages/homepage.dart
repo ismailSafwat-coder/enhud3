@@ -5,6 +5,7 @@ import 'package:enhud/pages/WeeklyReport.dart';
 import 'package:enhud/pages/notificationscreen.dart';
 import 'package:enhud/pages/settings/accountinfo_page.dart';
 import 'package:enhud/pages/todayschedule.dart';
+import 'package:enhud/screens/0_generation_home_screen.dart';
 import 'package:enhud/screens/1_material_selection_screen.dart';
 import 'package:enhud/screens/6_results_screen.dart';
 import 'package:flutter/material.dart';
@@ -350,8 +351,7 @@ class _HomepageState extends State<Homepage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) =>
-                        const MaterialSelectionScreen(isExamMode: true)));
+                    builder: (_) => const GenerationHomeScreen()));
           }
         },
         child: Text(material.examResult != null ? 'Results' : 'Start'),
@@ -427,6 +427,8 @@ class MotivationalMessages extends StatelessWidget {
               child: Center(
                 child: Text(msg,
                     textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 4,
                     style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.bold)),
               ),

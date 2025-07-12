@@ -245,7 +245,11 @@ class _TodayscheduleState extends State<Todayschedule> {
                           Text(
                             //+{noti[index][description][1]['title']}
 
-                            " Teacher :${noti[index][description][0]['title']} ",
+                            noti[index][category] == "Study"
+                                ? noti[index]['description'] is List
+                                    ? " units: ${(noti[index]['description'] as List).map((item) => item['title']).join(', ')}"
+                                    : " units: ${noti[index]['description']}"
+                                : ' Teacher :  ${noti[index][description]}',
                             style: const TextStyle(
                                 fontSize: 16,
                                 overflow: TextOverflow.ellipsis,

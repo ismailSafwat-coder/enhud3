@@ -1,3 +1,4 @@
+import 'package:enhud/main.dart';
 import 'package:enhud/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import '2_scope_selection_screen.dart';
@@ -27,12 +28,17 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Choose Material")),
+      appBar: AppBar(
+        title: const Text("Choose Material"),
+        backgroundColor: AppColors.primary,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(
+            SizedBox(
+              height: deviceheight * 0.75,
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -83,6 +89,7 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
                             textStyle: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
                                 fontFamily: 'Cairo'),
                           ),
                           onPressed: () => Navigator.pop(context),

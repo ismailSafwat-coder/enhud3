@@ -131,7 +131,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
                   ),
                   const Text(
                     ' Empty',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 11),
                   )
                 ],
               ),
@@ -147,7 +147,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
                   ),
                   const Text(
                     ' Activity',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 11),
                   )
                 ],
               ),
@@ -163,7 +163,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
                   ),
                   const Text(
                     ' StudyDialog / Task',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 11),
                   )
                 ],
               ),
@@ -179,7 +179,7 @@ class _StudeytablepageState extends State<Studeytablepage> {
                   ),
                   const Text(
                     ' Exam',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 11),
                   )
                 ],
               ),
@@ -195,15 +195,18 @@ class _StudeytablepageState extends State<Studeytablepage> {
                   ),
                   const Text(
                     ' Material',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 11),
                   )
                 ],
               ),
             ],
           )),
       appBar: AppBar(
-        leading:
-            IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
         title: Text(_getWeekTitle()),
         centerTitle: true,
       ),
