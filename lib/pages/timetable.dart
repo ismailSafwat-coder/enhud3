@@ -36,9 +36,9 @@ class _StudyTimetableState extends State<StudyTimetable> {
     "Study",
     "Exam",
     "Activity",
-    "sleep",
-    "freetime",
-    "Another Class"
+    // "sleep",
+    // "freetime",
+    // "Another Class"
   ];
 
   void _initNotifications() async {
@@ -820,6 +820,11 @@ class _StudyTimetableState extends State<StudyTimetable> {
                     ),
                     onPressed: () {
                       setState(() {
+                        if (selectedCategory == 'Study') {}
+                        if (selectedCategory == 'sleep' ||
+                            selectedCategory == "freetime") {
+                          Navigator.of(context).pop();
+                        }
                         if (taskController.text.isNotEmpty) {
                           pickTimeAndScheduleNotification(
                             timeSlots[rowIndex],
@@ -847,7 +852,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
                             "priority":
                                 selectedCategory == 'Task' ? _priority : null,
                             'chapter': selectedCategory == 'Study'
-                                ? chapter.text.trim() ?? 'notentered'
+                                ? chapter.text.trim()
                                 : selectedCategory == 'Material'
                                     ? chapter.text.trim()
                                     : '',

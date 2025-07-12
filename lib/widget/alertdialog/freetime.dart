@@ -64,7 +64,7 @@ class _FreetimeState extends State<Freetime> {
         child: Column(
           children: [
             //image
-            Image.asset('images/Clock.png'),
+            Image.asset('images/clock.png'),
             //container text
             Container(
               margin: const EdgeInsets.only(top: 8),

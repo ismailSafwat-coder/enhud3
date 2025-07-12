@@ -88,9 +88,7 @@ class Notifications {
         print('User pressed Done');
         _markNotificationAsDone(response.payload);
         break;
-      case '2':
-        print('User pressed Snooze');
-        break;
+
       default:
         print('Notification tapped (no action)');
         break;
@@ -115,12 +113,12 @@ class Notifications {
             titleColor: Colors.green,
             showsUserInterface: true,
           ),
-          AndroidNotificationAction(
-            '2',
-            'Snooze',
-            titleColor: Colors.orange,
-            showsUserInterface: true,
-          ),
+          // AndroidNotificationAction(
+          //   '2',
+          //   'Snooze',
+          //   titleColor: Colors.orange,
+          //   showsUserInterface: true,
+          // ),
         ],
       ),
     );

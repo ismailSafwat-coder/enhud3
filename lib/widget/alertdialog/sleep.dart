@@ -3,6 +3,8 @@ import 'package:enhud/widget/alertdialog/dropdownbuttoms.dart';
 import 'package:enhud/widget/sleeptextform.dart';
 import 'package:enhud/widget/studytabletextform.dart';
 import 'package:flutter/material.dart';
+import 'package:enhud/widget/alertdialog/sleep.dart';
+import 'package:intl/intl.dart';
 
 class Sleep extends StatefulWidget {
   const Sleep({super.key});
@@ -12,6 +14,34 @@ class Sleep extends StatefulWidget {
 }
 
 class _SleepState extends State<Sleep> {
+  TimeOfDay? sleepTime;
+  TimeOfDay? wakeUpTime;
+
+  Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isSleepTime
+          ? sleepTime ?? TimeOfDay.now()
+          : wakeUpTime ?? TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isSleepTime) {
+          sleepTime = picked;
+        } else {
+          wakeUpTime = picked;
+        }
+      });
+    }
+  }
+
+  String formatTimeOfDay(TimeOfDay timeOfDay) {
+    final now = DateTime.now();
+    final dateTime = DateTime(
+        now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
+    return DateFormat('h:mm a').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -62,7 +92,23 @@ class _SleepState extends State<Sleep> {
                     const SizedBox(
                       width: 20,
                     ),
-                    Sleeptextform(hintText: 'Default')
+                    GestureDetector(
+                      onTap: () => _selectTime(context, true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFdedede)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          sleepTime != null
+                              ? formatTimeOfDay(sleepTime!)
+                              : 'Default',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
                   ],
                 ),
                 const SizedBox(
@@ -78,7 +124,23 @@ class _SleepState extends State<Sleep> {
                     const SizedBox(
                       width: 20,
                     ),
-                    Sleeptextform(hintText: 'Default')
+                    GestureDetector(
+                      onTap: () => _selectTime(context, false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFdedede)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          wakeUpTime != null
+                              ? formatTimeOfDay(wakeUpTime!)
+                              : 'Default',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
                   ],
                 ),
                 const SizedBox(
