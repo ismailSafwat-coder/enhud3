@@ -222,7 +222,7 @@ class _CustomFormState extends State<CustomForm> {
             ],
           ),
           const SizedBox(
-            height: 30,
+            height: 20,
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -253,7 +253,7 @@ class _CustomFormState extends State<CustomForm> {
             ),
           ),
           const SizedBox(
-            height: 20,
+            height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
