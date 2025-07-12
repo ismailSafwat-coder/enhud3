@@ -853,140 +853,149 @@ class _StudyTimetableState extends State<StudyTimetable> {
                     const Freetime()
                   ],
                   const Spacer(),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (taskController.text.isNotEmpty) {
-                          pickTimeAndScheduleNotification(
-                            timeSlots[rowIndex],
-                            context,
-                            taskController.text,
-                            descriptioncontroller.text,
-                            rowIndex: rowIndex,
-                            colIndex: colIndex,
-                          );
-                          List<Map<String, dynamic>> studyTasks = [];
-                          if (selectedCategory == 'Study') {
-                            List<String> lines =
-                                descriptioncontroller.text.trim().split('\n');
-                            studyTasks = lines
-                                .where((line) => line.trim().isNotEmpty)
-                                .map((line) =>
-                                    {'title': line.trim(), 'done': false})
-                                .toList();
-                          }
-                          Map<String, dynamic> notificationInfotoStore = {
-                            'id': id,
-                            "weeknumber": DateTime.now().weekday,
-                            "daynumber": DateTime.now().day,
-                            "week": currentWeekOffset,
-                            "row": rowIndex,
-                            'column': colIndex,
-                            "title": taskController.text.trim(),
-                            "description": selectedCategory == 'Study'
-                                ? studyTasks
-                                : descriptioncontroller.text.trim(),
-                            "unit": selectedCategory == 'Study'
-                                ? unitController.text.trim()
-                                : '',
-                            "category": selectedCategory,
-                            "done": false,
-                            "time": _extractFirstTime(timeSlots[rowIndex]),
-                            "priority":
-                                selectedCategory == 'Task' ? _priority : null,
-                          };
-                          storeEoHive(notificationInfotoStore);
-                          // Update the current week's content
-                          allWeeksContent[currentWeekOffset][rowIndex]
-                              [colIndex] = Container(
-                            padding: const EdgeInsets.all(0),
-                            height: height * 0.13,
-                            width: double.infinity,
-                            color: selectedCategory == 'Task'
-                                ? const Color(0xffffa45b)
-                                : selectedCategory == 'Study'
-                                    ? const Color(0xffffa45b)
-                                    : selectedCategory == 'Exam'
-                                        ? const Color(0xffff6b6b)
-                                        : selectedCategory == 'Material'
-                                            ? const Color(0xff5f8cf8)
-                                            : selectedCategory == 'Activity'
-                                                ? const Color(0xffffe66d)
-                                                : const Color(0xff9bb7fa),
-                            child: descriptioncontroller.text.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      taskController.text,
-                                      style: commonTextStyle,
-                                    ),
-                                  )
-                                : Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        taskController.text,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Wrap(
-                                        children: [
-                                          Text(
-                                            textAlign: TextAlign.center,
-                                            overflow: TextOverflow.ellipsis,
-                                            descriptioncontroller.text,
-                                            maxLines: 3,
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 17),
+                  selectedCategory == 'sleep'
+                      ? const SizedBox()
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (taskController.text.isNotEmpty) {
+                                pickTimeAndScheduleNotification(
+                                  timeSlots[rowIndex],
+                                  context,
+                                  taskController.text,
+                                  descriptioncontroller.text,
+                                  rowIndex: rowIndex,
+                                  colIndex: colIndex,
+                                );
+                                List<Map<String, dynamic>> studyTasks = [];
+                                if (selectedCategory == 'Study') {
+                                  List<String> lines = descriptioncontroller
+                                      .text
+                                      .trim()
+                                      .split('\n');
+                                  studyTasks = lines
+                                      .where((line) => line.trim().isNotEmpty)
+                                      .map((line) =>
+                                          {'title': line.trim(), 'done': false})
+                                      .toList();
+                                }
+                                Map<String, dynamic> notificationInfotoStore = {
+                                  'id': id,
+                                  "weeknumber": DateTime.now().weekday,
+                                  "daynumber": DateTime.now().day,
+                                  "week": currentWeekOffset,
+                                  "row": rowIndex,
+                                  'column': colIndex,
+                                  "title": taskController.text.trim(),
+                                  "description": selectedCategory == 'Study'
+                                      ? studyTasks
+                                      : descriptioncontroller.text.trim(),
+                                  "unit": selectedCategory == 'Study'
+                                      ? unitController.text.trim()
+                                      : '',
+                                  "category": selectedCategory,
+                                  "done": false,
+                                  "time":
+                                      _extractFirstTime(timeSlots[rowIndex]),
+                                  "priority": selectedCategory == 'Task'
+                                      ? _priority
+                                      : null,
+                                };
+                                storeEoHive(notificationInfotoStore);
+                                // Update the current week's content
+                                allWeeksContent[currentWeekOffset][rowIndex]
+                                    [colIndex] = Container(
+                                  padding: const EdgeInsets.all(0),
+                                  height: height * 0.13,
+                                  width: double.infinity,
+                                  color: selectedCategory == 'Task'
+                                      ? const Color(0xffffa45b)
+                                      : selectedCategory == 'Study'
+                                          ? const Color(0xffffa45b)
+                                          : selectedCategory == 'Exam'
+                                              ? const Color(0xffff6b6b)
+                                              : selectedCategory == 'Material'
+                                                  ? const Color(0xff5f8cf8)
+                                                  : selectedCategory ==
+                                                          'Activity'
+                                                      ? const Color(0xffffe66d)
+                                                      : const Color(0xff9bb7fa),
+                                  child: descriptioncontroller.text.isEmpty
+                                      ? Center(
+                                          child: Text(
+                                            taskController.text,
+                                            style: commonTextStyle,
                                           ),
-                                        ],
-                                      )
-                                    ],
+                                        )
+                                      : Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              taskController.text,
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Wrap(
+                                              children: [
+                                                Text(
+                                                  textAlign: TextAlign.center,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  descriptioncontroller.text,
+                                                  maxLines: 3,
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 17),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                );
+                              } else if (taskController.text.isEmpty &&
+                                  descriptioncontroller.text.isEmpty) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => const AlertDialog(
+                                    content:
+                                        Text('please filled required filled'),
                                   ),
-                          );
-                        } else if (taskController.text.isEmpty &&
-                            descriptioncontroller.text.isEmpty) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => const AlertDialog(
-                              content: Text('please filled required filled'),
-                            ),
-                          );
-                          // Show the time picker
-                        }
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: Center(
-                      child: selectedCategory == 'sleep' ||
-                              selectedCategory == 'freetime' ||
-                              selectedCategory == 'Another Class'
-                          ? const Text('Save',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18))
-                          : selectedCategory == null
-                              ? const Text(
-                                  'Add',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 18),
-                                )
-                              : Text('Add $selectedCategory',
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 18)),
-                    ),
-                  ),
+                                );
+                                // Show the time picker
+                              }
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Center(
+                            child: selectedCategory == 'sleep' ||
+                                    selectedCategory == 'freetime' ||
+                                    selectedCategory == 'Another Class'
+                                ? const Text('Save',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 18))
+                                : selectedCategory == null
+                                    ? const Text(
+                                        'Add',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      )
+                                    : Text('Add $selectedCategory',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 18)),
+                          ),
+                        ),
                 ],
               ),
             ),

@@ -243,7 +243,9 @@ class _TodayscheduleState extends State<Todayschedule> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            " Teacher :${noti[index][description]}",
+                            //+{noti[index][description][1]['title']}
+
+                            " Teacher :${noti[index][description][0]['title']} ",
                             style: const TextStyle(
                                 fontSize: 16,
                                 overflow: TextOverflow.ellipsis,

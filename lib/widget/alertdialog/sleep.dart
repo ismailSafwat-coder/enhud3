@@ -1,9 +1,7 @@
+import 'package:enhud/pages/notifications/notifications.dart';
 import 'package:enhud/main.dart';
 import 'package:enhud/widget/alertdialog/dropdownbuttoms.dart';
-import 'package:enhud/widget/sleeptextform.dart';
-import 'package:enhud/widget/studytabletextform.dart';
 import 'package:flutter/material.dart';
-import 'package:enhud/widget/alertdialog/sleep.dart';
 import 'package:intl/intl.dart';
 
 class Sleep extends StatefulWidget {
@@ -16,6 +14,80 @@ class Sleep extends StatefulWidget {
 class _SleepState extends State<Sleep> {
   TimeOfDay? sleepTime;
   TimeOfDay? wakeUpTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _initNotifications();
+    _loadSavedTimes();
+  }
+
+  void _initNotifications() async {
+    await Notifications().initNotification();
+  }
+
+  void _loadSavedTimes() async {
+    if (mybox != null && mybox!.isOpen) {
+      final savedSleepTime = mybox!.get('sleepTime');
+      final savedWakeUpTime = mybox!.get('wakeUpTime');
+
+      if (savedSleepTime != null) {
+        setState(() {
+          sleepTime = TimeOfDay(
+              hour: savedSleepTime['hour'], minute: savedSleepTime['minute']);
+        });
+      }
+
+      if (savedWakeUpTime != null) {
+        setState(() {
+          wakeUpTime = TimeOfDay(
+              hour: savedWakeUpTime['hour'], minute: savedWakeUpTime['minute']);
+        });
+      }
+    }
+  }
+
+  Future<void> _saveAndScheduleNotifications() async {
+    if (mybox != null && mybox!.isOpen) {
+      // Save sleep time
+      if (sleepTime != null) {
+        await mybox!.put('sleepTime',
+            {'hour': sleepTime!.hour, 'minute': sleepTime!.minute});
+
+        // Schedule sleep notification
+        await Notifications().scheduleNotification(
+          week: 0,
+          row: 0,
+          column: 0,
+          title: "Time to Sleep",
+          body: "It's your bedtime. Good night!",
+          hour: sleepTime!.hour,
+          minute: sleepTime!.minute,
+        );
+      }
+
+      // Save wake-up time
+      if (wakeUpTime != null) {
+        await mybox!.put('wakeUpTime',
+            {'hour': wakeUpTime!.hour, 'minute': wakeUpTime!.minute});
+
+        // Schedule wake-up notification
+        await Notifications().scheduleNotification(
+          week: 0,
+          row: 1,
+          column: 0,
+          title: "Time to Wake Up",
+          body: "Good morning! It's time to start your day.",
+          hour: wakeUpTime!.hour,
+          minute: wakeUpTime!.minute,
+        );
+      }
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Sleep schedule saved and notifications set')));
+    }
+  }
 
   Future<void> _selectTime(BuildContext context, bool isSleepTime) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -67,7 +139,7 @@ class _SleepState extends State<Sleep> {
           Container(
             width: 300,
             margin: const EdgeInsets.only(left: 5),
-            height: MediaQuery.sizeOf(context).height * 0.32,
+            height: MediaQuery.sizeOf(context).height * 0.39,
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
             decoration: BoxDecoration(
                 color: Colors.white,
@@ -174,6 +246,19 @@ class _SleepState extends State<Sleep> {
                     ),
                     MyDropdownbuttoms()
                   ],
+                ),
+                const SizedBox(height: 15),
+                ElevatedButton(
+                  onPressed: _saveAndScheduleNotifications,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                  ),
+                  child: const Text(
+                    'Save and Set Notifications',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),
