@@ -125,6 +125,19 @@ class ResultsScreen extends StatelessWidget {
                 "View Answers",
                 style: TextStyle(color: Colors.white),
               ),
+            ),
+            const SizedBox(height: 15),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Go To Home Page",
+                style: TextStyle(color: Colors.white),
+              ),
             )
           ],
         ),
