@@ -50,8 +50,8 @@ class _TodayscheduleState extends State<Todayschedule> {
         3: 5, // Monday
         4: 6, // Tuesday
         5: 7, // Wednesday
-        6: 2, // Thursday
-        7: 1, // Friday
+        6: 1, // Thursday Saturday
+        7: 2, // Friday   Sunday
       };
 
       todayNotifications = notificationItemMap.where((item) {
@@ -69,12 +69,12 @@ class _TodayscheduleState extends State<Todayschedule> {
         int column = item['column'] ?? 0;
         bool isToday = columnToWeekday[today] == column;
 
-        // print('Is current week: $isCurrentWeek, Is today: $isToday');
+        print('Is current week: $isCurrentWeek, Is today: $isToday');
 
         return isCurrentWeek && isToday;
       }).toList();
 
-      // print('Filtered todayNotifications: $todayNotifications');
+      print('Filtered todayNotifications: $todayNotifications');
     } else {
       notificationItemMap = [];
       todayNotifications = [];
