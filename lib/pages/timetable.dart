@@ -12,6 +12,7 @@ import 'package:enhud/widget/alertdialog/taskdilog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:enhud/core/core.dart';
+import 'package:enhud/widget/alertdialog/study_details_dialog.dart';
 
 class StudyTimetable extends StatefulWidget {
   const StudyTimetable({super.key});
@@ -26,7 +27,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
   late double width;
   String _priority = "Medium";
   TimeOfDay? startTime;
-
+  int id = DateTime.now().millisecondsSinceEpoch % 1000000000;
   // Track current week offset (0 = current week, 1 = next week, etc.)
   // int _currentWeekOffset = 0;
 
@@ -36,9 +37,9 @@ class _StudyTimetableState extends State<StudyTimetable> {
     "Study",
     "Exam",
     "Activity",
-    // "sleep",
-    // "freetime",
-    // "Another Class"
+    "sleep",
+    "freetime",
+    "Another Class"
   ];
 
   void _initNotifications() async {
@@ -435,6 +436,17 @@ class _StudyTimetableState extends State<StudyTimetable> {
     }
   }
 
+  Map<String, dynamic>? findItemInCell(int rowIndex, int colIndex) {
+    try {
+      return notificationItemMap.firstWhere((item) =>
+          item['week'] == currentWeekOffset &&
+          item['row'] == rowIndex &&
+          item['column'] == colIndex);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     height = MediaQuery.sizeOf(context).height;
@@ -571,7 +583,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
   }
 
   Widget _buildTableCellWithGesture(int rowIndex, int colIndex) {
-    /// Returns true if the cell at [row],[col] is the default empty Text('')
     bool isCellEmpty(int row, int col) {
       final widget = _currentWeekContent[row][col];
       return widget is Text && (widget.data?.trim().isEmpty ?? true);
@@ -579,93 +590,126 @@ class _StudyTimetableState extends State<StudyTimetable> {
 
     return GestureDetector(
       onTap: () {
-        // i wnat to make sure that the cell is empety
         if (isCellEmpty(rowIndex, colIndex)) {
           _showAddItemDialog(rowIndex, colIndex);
         } else {}
       },
       onLongPress: () {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            content: const Text(
-              'What do you want to do?',
-              style: commonTextStyle,
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showAddItemDialog(rowIndex, colIndex);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text('Edit'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      // Confirmation dialog
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          content: const Text(
-                            textAlign: TextAlign.center,
-                            'Are you sure to Delete this ?!',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          actions: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Cancel delete
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  child: const Text('Cancel'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _currentWeekContent[rowIndex][colIndex] =
-                                          const Text('');
-                                    });
-                                    notificationItemMap.removeWhere((item) =>
-                                        item['row'] == rowIndex &&
-                                        item['column'] == colIndex);
-                                    mybox!.put('noti', notificationItemMap);
-                                    Navigator.pop(
-                                        context); // Close confirm dialog
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                  ),
-                                  child: const Text('Ok'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+        final item = findItemInCell(rowIndex, colIndex);
+        if (item != null && item['category'] == 'Study') {
+          List<Map<String, dynamic>> tasks = [];
+          if (item['description'] is List) {
+            tasks = List<Map<String, dynamic>>.from(item['description']);
+          }
+
+          showDialog(
+            context: context,
+            builder: (context) {
+              return StudyDetailsDialog(
+                unitTitle: item['unit'] ?? 'Unit Details',
+                tasks: tasks,
+                onUpdate: (updatedTasks) {
+                  setState(() {
+                    int itemIndex = notificationItemMap
+                        .indexWhere((i) => i['id'] == item['id']);
+                    if (itemIndex != -1) {
+                      notificationItemMap[itemIndex]['description'] =
+                          updatedTasks;
+                      mybox!.put('noti', notificationItemMap);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Changes saved successfully!')),
                       );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
-                    child: const Text('Delete'),
-                  ),
-                ],
+                    }
+                  });
+                },
+              );
+            },
+          );
+        } else if (item != null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              content: const Text(
+                'What do you want to do?',
+                style: commonTextStyle,
+                textAlign: TextAlign.center,
               ),
-            ],
-          ),
-        );
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showAddItemDialog(rowIndex, colIndex);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      child: const Text('Edit'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // Confirmation dialog
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            content: const Text(
+                              textAlign: TextAlign.center,
+                              'Are you sure to Delete this ?!',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            actions: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context); // Cancel delete
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                    ),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _currentWeekContent[rowIndex]
+                                            [colIndex] = const Text('');
+                                      });
+                                      notificationItemMap.removeWhere((item) =>
+                                          item['row'] == rowIndex &&
+                                          item['column'] == colIndex);
+                                      mybox!.put('noti', notificationItemMap);
+                                      Navigator.pop(
+                                          context); // Close confirm dialog
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                    ),
+                                    child: const Text('Ok'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
       },
       child: Container(
         color: const Color(0xffE4E4E4),
@@ -680,6 +724,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
     String? selectedCategory;
     TextEditingController taskController = TextEditingController();
     TextEditingController descriptioncontroller = TextEditingController();
+    TextEditingController unitController = TextEditingController();
     TextEditingController chapter = TextEditingController(text: 'not entered');
 
     showDialog(
@@ -757,7 +802,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Dynamic fields based on category
                   if (selectedCategory == 'Task') ...[
                     Taskdilog(
                         type: 'Task',
@@ -808,7 +852,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
                   ] else if (selectedCategory == 'freetime') ...[
                     const Freetime()
                   ],
-
                   const Spacer(),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -820,11 +863,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
                     ),
                     onPressed: () {
                       setState(() {
-                        if (selectedCategory == 'Study') {}
-                        if (selectedCategory == 'sleep' ||
-                            selectedCategory == "freetime") {
-                          Navigator.of(context).pop();
-                        }
                         if (taskController.text.isNotEmpty) {
                           pickTimeAndScheduleNotification(
                             timeSlots[rowIndex],
@@ -834,28 +872,35 @@ class _StudyTimetableState extends State<StudyTimetable> {
                             rowIndex: rowIndex,
                             colIndex: colIndex,
                           );
-
+                          List<Map<String, dynamic>> studyTasks = [];
+                          if (selectedCategory == 'Study') {
+                            List<String> lines =
+                                descriptioncontroller.text.trim().split('\n');
+                            studyTasks = lines
+                                .where((line) => line.trim().isNotEmpty)
+                                .map((line) =>
+                                    {'title': line.trim(), 'done': false})
+                                .toList();
+                          }
                           Map<String, dynamic> notificationInfotoStore = {
-                            'id': (currentWeekOffset * 100) +
-                                (rowIndex * 10) +
-                                colIndex,
+                            'id': id,
                             "weeknumber": DateTime.now().weekday,
                             "daynumber": DateTime.now().day,
                             "week": currentWeekOffset,
                             "row": rowIndex,
                             'column': colIndex,
                             "title": taskController.text.trim(),
-                            "description": descriptioncontroller.text.trim(),
+                            "description": selectedCategory == 'Study'
+                                ? studyTasks
+                                : descriptioncontroller.text.trim(),
+                            "unit": selectedCategory == 'Study'
+                                ? unitController.text.trim()
+                                : '',
                             "category": selectedCategory,
                             "done": false,
                             "time": _extractFirstTime(timeSlots[rowIndex]),
                             "priority":
                                 selectedCategory == 'Task' ? _priority : null,
-                            'chapter': selectedCategory == 'Study'
-                                ? chapter.text.trim()
-                                : selectedCategory == 'Material'
-                                    ? chapter.text.trim()
-                                    : '',
                           };
                           storeEoHive(notificationInfotoStore);
                           // Update the current week's content

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:enhud/main.dart';
 import 'package:enhud/utils/app_colors.dart';
 import 'package:enhud/widget/exam_header.dart';
 import 'package:enhud/widget/exam_navigation.dart';
@@ -11,7 +12,10 @@ import '6_results_screen.dart';
 
 class ExamTakingScreen extends StatefulWidget {
   final List<Question> questions;
-  const ExamTakingScreen({super.key, required this.questions});
+  final String material;
+
+  const ExamTakingScreen(
+      {super.key, required this.questions, required this.material});
 
   @override
   State<ExamTakingScreen> createState() => _ExamTakingScreenState();
@@ -51,6 +55,17 @@ class _ExamTakingScreenState extends State<ExamTakingScreen> {
     });
   }
 
+  Future<void> _saveExamResult(ExamResult result) async {
+    if (mybox == null || !mybox!.isOpen) return;
+
+    List<dynamic> resultsList = mybox!.get('exam_results', defaultValue: []);
+
+    resultsList.add(result.toJson());
+
+    await mybox!.put('exam_results', resultsList);
+    print("Exam result saved successfully!");
+  }
+
   void _submitExam() {
     _timer?.cancel();
     int correctCount = 0;
@@ -61,12 +76,16 @@ class _ExamTakingScreenState extends State<ExamTakingScreen> {
     }
 
     final result = ExamResult(
+      material: widget.material,
       totalQuestions: widget.questions.length,
       correctAnswers: correctCount,
       userAnswers: Map.fromEntries(_userAnswers.asMap().entries),
       questions: widget.questions,
       timeConsumedInSeconds: 600 - _timeRemainingInSeconds,
+      timestamp: DateTime.now(),
     );
+
+    _saveExamResult(result);
 
     if (mounted) {
       Navigator.pushReplacement(context,

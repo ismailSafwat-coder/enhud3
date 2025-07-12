@@ -270,13 +270,13 @@ class _NotificationCardState extends State<NotificationCard> {
                     style: const TextStyle(
                         color: Colors.black, fontWeight: FontWeight.bold)),
               ),
-              const SizedBox(width: 10),
-              TextButton(
-                onPressed: () {},
-                child: const Text("Snooze",
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold)),
-              ),
+              // const SizedBox(width: 10),
+              // TextButton(
+              //   onPressed: () {},
+              //   child: const Text("Snooze",
+              //       style: TextStyle(
+              //           color: Colors.black, fontWeight: FontWeight.bold)),
+              // ),
             ],
           ),
         ],

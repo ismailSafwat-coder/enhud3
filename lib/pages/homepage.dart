@@ -1,14 +1,31 @@
 import 'package:enhud/core/core.dart';
+import 'package:enhud/main.dart';
+import 'package:enhud/models/exam_result.dart';
 import 'package:enhud/pages/WeeklyReport.dart';
 import 'package:enhud/pages/notificationscreen.dart';
 import 'package:enhud/pages/settings/accountinfo_page.dart';
-import 'package:enhud/pages/settings/notification.dart';
 import 'package:enhud/pages/todayschedule.dart';
-import 'package:enhud/test/noti.dart';
+import 'package:enhud/screens/1_material_selection_screen.dart';
+import 'package:enhud/screens/6_results_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import '../main.dart';
+class StudyMaterial {
+  final String title;
+  final String unit;
+  final double studyProgress;
+
+  StudyMaterial(
+      {required this.title, required this.unit, this.studyProgress = 0.0});
+}
+
+class TestMaterial {
+  final String title;
+  final String unit;
+  final ExamResult? examResult;
+
+  TestMaterial({required this.title, required this.unit, this.examResult});
+}
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -18,174 +35,175 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  late Future<List<StudyMaterial>> _studyingFuture;
+  late Future<List<TestMaterial>> _testsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
+    _studyingFuture = _getStudyingMaterials();
+    _testsFuture = _getTestMaterials();
+  }
+
+  Future<List<StudyMaterial>> _getStudyingMaterials() async {
+    if (mybox == null || !mybox!.isOpen) return [];
+    final scheduleItems = mybox!.get('noti', defaultValue: []);
+    final studyMaterials = scheduleItems
+        .where((item) => item is Map && item['category'] == 'Study')
+        .toList();
+
+    List<StudyMaterial> progressList = [];
+    for (var material in studyMaterials) {
+      double studyProgress = 0.0;
+      if (material['description'] is List &&
+          (material['description'] as List).isNotEmpty) {
+        var tasks = (material['description'] as List);
+        var completedTasks = tasks.where((task) => task['done'] == true).length;
+        studyProgress = completedTasks / tasks.length;
+      }
+      progressList.add(StudyMaterial(
+        title: material['title'] ?? 'Unknown',
+        unit: material['unit'] ?? '',
+        studyProgress: studyProgress,
+      ));
+    }
+    return progressList;
+  }
+
+  Future<List<TestMaterial>> _getTestMaterials() async {
+    if (mybox == null || !mybox!.isOpen) return [];
+    final scheduleItems = mybox!.get('noti', defaultValue: []);
+    final examResultsData = mybox!.get('exam_results', defaultValue: []);
+
+    final examResults = examResultsData
+        .map((data) => data is Map
+            ? ExamResult.fromJson(Map<String, dynamic>.from(data))
+            : null)
+        .where((result) => result != null)
+        .cast<ExamResult>()
+        .toList();
+
+    final studyMaterials = scheduleItems
+        .where((item) => item is Map && item['category'] == 'Study')
+        .toList();
+
+    List<TestMaterial> testList = [];
+    for (var material in studyMaterials) {
+      ExamResult? relatedExam;
+      try {
+        relatedExam = examResults.lastWhere(
+          (result) =>
+              result.material.toLowerCase() ==
+              (material['title'] as String).toLowerCase(),
+        );
+      } catch (e) {
+        relatedExam = null;
+      }
+      testList.add(TestMaterial(
+        title: material['title'] ?? 'Unknown',
+        unit: material['unit'] ?? '',
+        examResult: relatedExam,
+      ));
+    }
+    return testList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                //first row with user image
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFFebebeb))),
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      //image
-                      InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const AccountinfoPage()));
-                        },
-                        child: const CircleAvatar(
-                          radius: 25,
-                          backgroundImage: AssetImage(
-                            'images/accountimage.png',
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      //first icon
-                      InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const WeeklyReport()));
-                          },
-                          child: Container(
-                              child: Image.asset('images/message.png'))),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      //secound icon
-                      InkWell(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                _loadData();
+              });
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFebebeb))),
+                    child: Row(
+                      children: [
+                        InkWell(
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    const NotificationsScreen()));
+                                builder: (context) => const AccountinfoPage()));
                           },
-                          child: Container(
-                              child:
-                                  Image.asset('images/notificationvbell.png'))),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                //today schedule
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF7d7d7d))),
-                  child: const Todayschedule(),
-                ),
-                //material studing
-                const SizedBox(
-                  height: 15,
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.all(15),
-                        width: 350,
-                        decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //text
-                            const Text(
-                              // textAlign: TextAlign.end,
-                              ' Materials  Studying :',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.w500),
-                            ),
-                            //row of like math
-                            const Divider(
-                              height: 20,
-                            ),
-                            materilsfile('English unit', 0.8),
-                            const Divider(
-                              height: 20,
-                            ),
-                            materilsfile('physics unit', 0.4),
-                            const Divider(
-                              height: 20,
-                            ),
-                            materilsfile('math unit', 0.7)
-                          ],
+                          child: const CircleAvatar(
+                            radius: 25,
+                            backgroundImage:
+                                AssetImage('images/accountimage.png'),
+                          ),
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        width: 350,
-                        decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //text
-                            const Text(
-                              // textAlign: TextAlign.end,
-                              ' Unit  Tests :',
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.w500),
-                            ),
-                            //row of like math
-                            const Divider(
-                              height: 20,
-                            ),
-                            testfile('English unit', 0.8, false),
-                            const Divider(
-                              height: 20,
-                            ),
-                            testfile('Physics unit', 0.4, false),
-                            const Divider(
-                              height: 20,
-                            ),
-                            testfile('Maths | unit', 0.7, true)
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                //motivation message
-                const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Motivational Messages :',
-                            style: commonTextStyle),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        MotivationalMessages(),
+                        const Spacer(),
+                        InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const WeeklyReport()));
+                            },
+                            child: Image.asset('images/message.png')),
+                        const SizedBox(width: 10),
+                        InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NotificationsScreen()));
+                            },
+                            child: Image.asset('images/notificationvbell.png')),
                       ],
-                    ))
-              ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF7d7d7d))),
+                    child: const Todayschedule(),
+                  ),
+                  const SizedBox(height: 15),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildStudyCard(),
+                        const SizedBox(width: 10),
+                        _buildTestsCard(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Motivational Messages :',
+                              style: commonTextStyle),
+                          const SizedBox(height: 10),
+                          MotivationalMessages(),
+                        ],
+                      ))
+                ],
+              ),
             ),
           ),
         ),
@@ -193,81 +211,153 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Row materilsfile(String name, double? percent) {
+  Widget _buildStudyCard() {
+    return Container(
+      width: 350,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Materials Studying :',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500)),
+          const Divider(height: 20),
+          FutureBuilder<List<StudyMaterial>>(
+            future: _studyingFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+              if (!snapshot.hasData || snapshot.data!.isEmpty)
+                return const Text("No materials to study.");
+
+              final materials = snapshot.data!;
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: materials.length,
+                itemBuilder: (context, index) {
+                  return materilsfile(materials[index]);
+                },
+                separatorBuilder: (context, index) => const Divider(height: 20),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestsCard() {
+    return Container(
+      width: 350,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Materials Tests :',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500)),
+          const Divider(height: 20),
+          FutureBuilder<List<TestMaterial>>(
+            future: _testsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+              if (!snapshot.hasData || snapshot.data!.isEmpty)
+                return const Text("No tests available.");
+
+              final materials = snapshot.data!;
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: materials.length,
+                itemBuilder: (context, index) {
+                  return testfile(materials[index]);
+                },
+                separatorBuilder: (context, index) => const Divider(height: 20),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Row materilsfile(StudyMaterial material) {
     return Row(children: [
-      Image.asset(
-        'images/paper.png',
-        fit: BoxFit.contain,
-        width: 35,
-        height: 30,
-      ),
-      Text(
-        name,
-        style: midTextStyle,
-      ),
+      Image.asset('images/paper.png',
+          fit: BoxFit.contain, width: 35, height: 30),
+      const SizedBox(width: 5),
+      Text('${material.title} ${material.unit}', style: midTextStyle),
       const Spacer(),
-      percent != null
+      CircularPercentIndicator(
+        animation: true,
+        radius: 25,
+        percent: material.studyProgress,
+        lineWidth: 5,
+        progressColor: Colors.green,
+        center: Text(
+          "${(material.studyProgress * 100).toStringAsFixed(0)}%",
+          style: midTextStyle,
+        ),
+      )
+    ]);
+  }
+
+  Row testfile(TestMaterial material) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Row(
+        children: [
+          Image.asset('images/paper.png',
+              fit: BoxFit.contain, width: 35, height: 30),
+          const SizedBox(width: 5),
+          Text('${material.title} ${material.unit}', style: midTextStyle),
+        ],
+      ),
+      material.examResult != null
           ? CircularPercentIndicator(
               animation: true,
               radius: 25,
-              percent: percent,
+              percent: material.examResult!.percentage / 100,
               lineWidth: 5,
-              progressColor: Colors.green,
-              // circularStrokeCap: CircularStrokeCap.round,
-
+              progressColor: Colors.blue,
               center: Text(
-                (percent * 100).toStringAsFixed(0),
+                "${material.examResult!.percentage.toStringAsFixed(0)}%",
                 style: midTextStyle,
               ),
             )
-          : const Text('_')
-    ]);
-  }
-}
-
-Row testfile(String name, double? percent, bool finish) {
-  return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-    Row(
-      children: [
-        Image.asset(
-          'images/paper.png',
-          fit: BoxFit.contain,
-          width: 35,
-          height: 30,
-        ),
-      ],
-    ),
-    Text(
-      name,
-      style: midTextStyle,
-    ),
-    percent != null
-        ? CircularPercentIndicator(
-            animation: true,
-
-            radius: 25,
-            percent: percent,
-            lineWidth: 5,
-            progressColor: Colors.green,
-            // circularStrokeCap: CircularStrokeCap.round,
-
-            center: Text(
-              (percent * 100).toStringAsFixed(0),
+          : const Text(
+              '-',
               style: midTextStyle,
             ),
-          )
-        : const Text(
-            '-',
-            style: midTextStyle,
-          ),
-    MaterialButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // إصلاح الشكل
-        ),
-        color: finish ? Colors.blue : const Color(0xFF58d67e),
-        child: finish ? const Text('Results') : const Text('Strart'),
-        onPressed: () {})
-  ]);
+      MaterialButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        color:
+            material.examResult != null ? Colors.blue : const Color(0xFF58d67e),
+        textColor: Colors.white,
+        onPressed: () {
+          if (material.examResult != null) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        ResultsScreen(result: material.examResult!)));
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        const MaterialSelectionScreen(isExamMode: true)));
+          }
+        },
+        child: Text(material.examResult != null ? 'Results' : 'Start'),
+      )
+    ]);
+  }
 }
 
 class MotivationalMessages extends StatelessWidget {
@@ -276,12 +366,6 @@ class MotivationalMessages extends StatelessWidget {
     "“Despite the difficulties you may face, always remember that every success begins with one decision to start.”",
     "“Self-confidence is the most powerful weapon in facing challenges and achieving goals.”",
     "“Success is the accumulationof small efforts day after day, so do not underestimate any small effort you have made.”",
-    "“There is no dream that cannot be achieved if you are willing to work hard to achieve it.”",
-    "“Work smart and hard, and you will reap the rewards in due time.”",
-    "“Embrace failure as part of the learning journey, and use it to develop yourself and your abilities.”",
-    "“The greater the desire for success, the stronger the efforts and the better the results.”",
-    "“Excellence is not only achieved by natural abilities, but also by hard work and dedication to continuous improvement.”",
-    "“Change starts from within, so start by improving yourself before you try to change the world.”",
   ];
 
   MotivationalMessages({super.key});
@@ -298,46 +382,31 @@ class MotivationalMessages extends StatelessWidget {
                 context: context,
                 builder: (context) => AlertDialog(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                      borderRadius: BorderRadius.circular(20)),
                   backgroundColor: const Color(0xFFafcdf8),
-                  title: const Text(
-                    'Motivation',
-                    style: TextStyle(
-                      color: Color(0xFF4A90E2),
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  content: Text(
-                    msg,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF333333),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  title: const Text('Motivation',
+                      style: TextStyle(
+                          color: Color(0xFF4A90E2),
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center),
+                  content: Text(msg,
+                      style: const TextStyle(
+                          fontSize: 16, color: Color(0xFF333333)),
+                      textAlign: TextAlign.center),
                   actions: [
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: () => Navigator.of(context).pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4A90E2),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                              borderRadius: BorderRadius.circular(30)),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 10,
-                          ),
+                              horizontal: 30, vertical: 10),
                         ),
-                        child: const Text(
-                          'Got it!',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        child: const Text('Got it!',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -356,12 +425,10 @@ class MotivationalMessages extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Text(
-                  msg,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.bold),
-                ),
+                child: Text(msg,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ),
           );

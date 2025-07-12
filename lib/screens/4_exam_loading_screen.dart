@@ -47,7 +47,10 @@ class _ExamLoadingScreenState extends State<ExamLoadingScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (_) => ExamTakingScreen(questions: questions)),
+              builder: (_) => ExamTakingScreen(
+                    questions: questions,
+                    material: widget.file.path.split('/').last.split('.').first,
+                  )),
         );
       } else {
         Navigator.pushReplacement(
