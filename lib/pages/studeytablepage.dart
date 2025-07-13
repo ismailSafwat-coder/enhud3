@@ -202,11 +202,6 @@ class _StudeytablepageState extends State<Studeytablepage> {
             ],
           )),
       appBar: AppBar(
-        leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
         title: Text(_getWeekTitle()),
         centerTitle: true,
       ),

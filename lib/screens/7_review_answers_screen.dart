@@ -1,3 +1,4 @@
+import 'package:enhud/utils/app_colors.dart';
 import 'package:enhud/widget/answer_review_card.dart';
 import 'package:flutter/material.dart';
 import '../models/exam_result.dart';
@@ -11,6 +12,7 @@ class ReviewAnswersScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Review Answers"),
+        backgroundColor: AppColors.primary,
         actions: [
           Center(
               child: Padding(

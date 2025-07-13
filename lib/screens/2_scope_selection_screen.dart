@@ -20,7 +20,10 @@ class _ScopeSelectionScreenState extends State<ScopeSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Choose Exercises Scope")),
+      appBar: AppBar(
+        title: const Text("Choose Exercises Scope"),
+        backgroundColor: AppColors.primary,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(

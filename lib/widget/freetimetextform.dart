@@ -16,6 +16,7 @@ class Freetimetextform extends StatelessWidget {
             filled: true,
             fillColor: Colors.white,
             hintText: hintText,
+            hintStyle: const TextStyle(color: Colors.grey),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 22,
             ),

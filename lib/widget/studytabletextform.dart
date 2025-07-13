@@ -25,6 +25,7 @@ class Studytabletextform extends StatelessWidget {
               filled: true,
               fillColor: Colors.white,
               hintText: hintText,
+              hintStyle: const TextStyle(color: Colors.grey),
               contentPadding:
                   const EdgeInsets.only(top: 5, left: 10, right: 10),
               focusedBorder: OutlineInputBorder(

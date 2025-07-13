@@ -20,7 +20,10 @@ class ResultsScreen extends StatelessWidget {
     bool passed = result.percentage >= 60;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Exam Result")),
+      appBar: AppBar(
+        title: const Text("Exam Result"),
+        backgroundColor: AppColors.primary,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

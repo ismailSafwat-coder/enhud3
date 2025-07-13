@@ -1,3 +1,4 @@
+import 'package:enhud/utils/app_colors.dart';
 import 'package:enhud/widget/exercise_question_card.dart';
 import 'package:flutter/material.dart';
 import '../models/question.dart';
@@ -26,6 +27,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("${widget.questions.length} Questions"),
+        backgroundColor: AppColors.primary,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),

@@ -454,14 +454,6 @@ class _StudyTimetableState extends State<StudyTimetable> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            setState(() {
-              Navigator.pop(context);
-            });
-          },
-        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -769,7 +761,7 @@ class _StudyTimetableState extends State<StudyTimetable> {
                                             'Add Your Class',
                                             style: commonTextStyle,
                                           )
-                                        : Text('add New $selectedCategory'),
+                                        : Text('Add New $selectedCategory'),
                         const SizedBox(width: 20),
                       ],
                     ),

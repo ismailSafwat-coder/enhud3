@@ -33,7 +33,7 @@ class StudyDialog extends StatelessWidget {
               children: [
                 const Text(
                   'Material',
-                  style: commonTextStyle,
+                  style: midTextStyle,
                 ),
                 const SizedBox(
                   width: 10,
@@ -47,7 +47,7 @@ class StudyDialog extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text('unit', style: commonTextStyle),
+                const Text('Unit', style: midTextStyle),
                 const SizedBox(
                   width: 10,
                 ),
@@ -59,11 +59,11 @@ class StudyDialog extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text('description', style: commonTextStyle),
+                const Text('Description', style: midTextStyle),
                 const SizedBox(
                   width: 10,
                 ),
-                Studytabletextform(controller: att, hintText: 'chpter name'),
+                Studytabletextform(controller: att, hintText: 'Chapter Name'),
               ],
             ),
             const SizedBox(height: 10),

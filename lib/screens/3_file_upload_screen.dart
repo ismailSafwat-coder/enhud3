@@ -37,7 +37,10 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Upload Material File")),
+      appBar: AppBar(
+        title: const Text("Upload Material File"),
+        backgroundColor: AppColors.primary,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(

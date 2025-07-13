@@ -55,11 +55,16 @@ class MaterilDilog extends StatelessWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text('enter chpter '),
+                const Text(
+                  'Enter Chapter ',
+                ),
                 const SizedBox(
                   width: 10,
                 ),
-                Studytabletextform(controller: att, hintText: 'chpter name'),
+                Studytabletextform(
+                  controller: att,
+                  hintText: 'Chapter Name',
+                ),
               ],
             ),
             const SizedBox(height: 10),
